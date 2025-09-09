@@ -19,7 +19,7 @@ def decode_and_print_eeg_data(receiveBufferFloat, numberOfAcquiredChannels=8, Fr
 
 if __name__ == "__main__":
     print("Looking for an EEG stream...")
-    streams = pylsl.resolve_stream('type', 'EEG') 
+    streams = pylsl.resolve_byprop('name', 'fsdfsdf', timestamp=5)
     if not streams:
         print("No EEG stream found.")
     else:
