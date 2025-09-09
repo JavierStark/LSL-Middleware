@@ -1,25 +1,15 @@
 import pylsl
-import struct
-import random
+import requests
+import json
 
-def receive_eeg_stream():
-    # Resolve an EEG stream on the network
-    print("Looking for an EEG stream...")
-    streams = pylsl.resolve_stream('type', 'EEG')
-    if not streams:
-        print("No EEG stream found.")
-        return
-
-    # Create an inlet to read from the stream
-    inlet = pylsl.StreamInlet(streams[0])
-    print("EEG stream found. Receiving data...")
-
-    try:
-        while True:
-            sample, timestamp = inlet.pull_sample()
-            print(f"Timestamp: {timestamp}, Sample: {sample}")
-    except KeyboardInterrupt:
-        print("Stopped receiving.")
+def send_eeg_data_to_firebase(data, timestamp, api_key):
+    url = "https://neurostream-skani-default-rtdb.asia-southeast1.firebasedatabase.app/eeg_data.json?auth=" + api_key
+    payload = {
+        "timestamp": timestamp,
+        "data": data
+    }
+    response = requests.post(url, data=json.dumps(payload))
+    print("Response:", response.status_code, response.text)
 
 def decode_and_print_eeg_data(receiveBufferFloat, numberOfAcquiredChannels=8, FrameLength=1):
     for frame_idx in range(FrameLength):
@@ -29,7 +19,7 @@ def decode_and_print_eeg_data(receiveBufferFloat, numberOfAcquiredChannels=8, Fr
 
 if __name__ == "__main__":
     print("Looking for an EEG stream...")
-    streams = pylsl.resolve_stream('type', 'EEG')
+    streams = pylsl.resolve_stream('type', 'EEG') 
     if not streams:
         print("No EEG stream found.")
     else:
@@ -42,5 +32,6 @@ if __name__ == "__main__":
                 sample, timestamp = inlet.pull_sample()
                 print(f"Timestamp: {timestamp}")
                 decode_and_print_eeg_data(sample, numberOfAcquiredChannels, FrameLength)
+                send_eeg_data_to_firebase(sample, timestamp, "AIzaSyAMHsvcktvyXhnGHHmwNedmobqhLsFV7q0")
         except KeyboardInterrupt:
             print("Stopped receiving.")
