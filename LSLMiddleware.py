@@ -4,10 +4,9 @@ import json
 
 def send_eeg_data_to_firebase(data, timestamp, api_key):
     url = "https://neurostream-skani-default-rtdb.asia-southeast1.firebasedatabase.app/eeg_data.json?auth=" + api_key
-    payload = {
-        "timestamp": timestamp,
-        "data": data
-    }
+    # If data is already a dict (JSON), just add timestamp
+    payload = dict(data)  # Make a copy to avoid mutating original
+    payload["timestamp"] = timestamp
     response = requests.post(url, data=json.dumps(payload))
     print("Response:", response.status_code, response.text)
 
@@ -19,7 +18,7 @@ def decode_and_print_eeg_data(receiveBufferFloat, numberOfAcquiredChannels=8, Fr
 
 if __name__ == "__main__":
     print("Looking for an EEG stream...")
-    streams = pylsl.resolve_byprop('name', 'fsdfsdf', timestamp=5)
+    streams = pylsl.resolve_byprop('name', 'UN-2023.07.21', timeout=5)
     if not streams:
         print("No EEG stream found.")
     else:
